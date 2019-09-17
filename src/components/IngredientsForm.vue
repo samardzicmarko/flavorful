@@ -9,9 +9,9 @@
         label-for="input-1"
         description="Unesite sve potrebne sastojke uz odgovarajuču količinu, npr grama, žlica, komada itd.."
       >
-        <b-form-input id="input-1" v-model="new_input" type="text" @keyup.enter="add()"></b-form-input>
+        <b-form-input id="input-1" v-model="new_input" type="text" @keyup.enter="addIngrediants()"></b-form-input>
         <b-input-group-append>
-          <b-button class="btn" variant="outline-info" @click="add()">Dodaj</b-button>
+          <b-button class="btn" variant="outline-info" @click="addIngrediants()">Dodaj</b-button>
         </b-input-group-append>
       </b-input-group>
       <b-card-group deck id="list">
@@ -44,10 +44,29 @@
         </b-card>
       </b-card-group>
     </div>
+    <b-modal ref="editIngridient" id="ing-update-modal" title="Uredi" hide-footer>
+      <b-form v-on:click="saveEdit()" class="w-100">
+        <b-form-group id="form-edit-ing" label="Sastojak" label-for="edit-ing-input">
+          <b-form-input
+            id="ing-edit-input"
+            type="text"
+            v-model="editForm.ingredients_list"
+            required
+            placeholder="Enter ingredient"
+          ></b-form-input>
+        </b-form-group>
+        <b-button-group>
+          <b-button type="submit" variant="primary">Update</b-button>
+          <b-button type="reset" variant="danger">Cancel</b-button>
+        </b-button-group>
+      </b-form>
+    </b-modal>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'IngredientsForm',
 
@@ -61,13 +80,42 @@ export default {
       form: {
         ingredients_list: [{ ingredient: '' }],
       },
+
+      editForm: {
+        ingridient: '',
+      },
       show: true,
     };
   },
   methods: {
-    add() {
+    getIngrediants() {
+      const path = 'http://localhost:5000/recepies';
+      axios
+        .get(path)
+        .then((res) => {
+          this.recepies = res.data.ingredients_list;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
       this.ingredients_list.push(this.new_input);
       this.new_input = '';
+    },
+    addIngrediants(payload) {
+      const path = 'http://localhost:5000/recepies';
+      axios
+        .post(path, payload)
+        .then(() => {
+          this.getIngrediants();
+        })
+        .catch((error) => {
+          console.error(error);
+          this.getIngrediants();
+        });
+    },
+    initForm() {
+      this.form.ingredients_list = [];
+      this.editForm.ingredient = '';
     },
     onSubmit(evt) {
       evt.preventDefault();
@@ -80,17 +128,18 @@ export default {
       );
     },
     editIng(ing) {
-      this.editedIng = ing;
-      this.editActive = true;
-      console.log('trig');
+      this.editForm = ing;
     },
-    disableEditing() {
-      this.editedIng = null;
-      this.editActive = false;
-    },
-    saveEdit() {
-      this.ingredient = this.editedIng;
-      this.disableEditing();
+    saveEdit(evt) {
+      evt.preventDefault();
+      // this.$refs.edit
+      this.$refs.editIngridient.hide();
+      const payload = {
+        ingredients_list: this.editIng.ingridient,
+      };
+
+      this.updateIngrediant(payload, this.editedIng.id);
+      this.initForm();
     },
   },
   props: ['type'],
