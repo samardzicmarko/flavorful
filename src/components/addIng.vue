@@ -1,9 +1,35 @@
 <template>
   <div class="container">
     <div>
-      <b-table striped hover :items="items">
+      <b-form-group label="Selection mode:" label-cols-md="4">
         <b-form-select v-model="selectMode" :options="modes" class="mb-3"></b-form-select>
+      </b-form-group>
+
+      <b-table
+        ref="selectableTable"
+        selectable
+        :select-mode="selectMode"
+        selected-variant="success"
+        :items="items"
+        :fields="fields"
+        @row-selected="onRowSelected"
+        responsive="sm"
+      >
+        <!-- Example scoped slot for select state illustrative purposes -->
+        <template v-slot:cell(selected)="{ rowSelected }">
+          <template v-if="rowSelected">
+            <span aria-hidden="true">&check;</span>
+            <span class="sr-only">Selected</span>
+          </template>
+          <template v-else>
+            <span aria-hidden="true">&nbsp;</span>
+            <span class="sr-only">Not selected</span>
+          </template>
+        </template>
       </b-table>
+      <p>
+        <b-button size="sm" @click="clearSelected">Obrisi oznacene</b-button>
+      </p>
     </div>
   </div>
 </template>
@@ -34,22 +60,8 @@ export default {
           console.error(error);
         });
     },
-    onRowSelected(items) {
-      this.selected = items;
-    },
-    selectAllRows() {
-      this.$refs.selectableTable.selectAllRows();
-    },
     clearSelected() {
       this.$refs.selectableTable.clearSelected();
-    },
-    selectThirdRow() {
-      // Rows are indexed from 0, so the third row is index 2
-      this.$refs.selectableTable.selectRow(2);
-    },
-    unselectThirdRow() {
-      // Rows are indexed from 0, so the third row is index 2
-      this.$refs.selectableTable.unselectRow(2);
     },
   },
   created() {

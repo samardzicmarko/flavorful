@@ -29,25 +29,25 @@
 </template>
 
 <script>
-import VueRouter from "vue-router";
+import VueRouter from 'vue-router';
 
 export default {
-  name: "Login",
+  name: 'Login',
   data() {
     return {
       userDetails: {
-        email: "",
-        password: ""
+        email: '',
+        password: '',
       },
-      show: true
+      show: true,
     };
   },
   methods: {
     onSubmit(evt) {
       evt.preventDefault();
       alert(JSON.stringify(this.form));
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -36,29 +36,32 @@
             </b-row>
             <b-button
               class="btn btn-info"
-              @click="filterCategory"
+              v-on:click.stop.prevent="filterCategory"
               v-if="expandFilter"
             >Pretraži po kategorijama</b-button>
             <b-button
               class="btn btn-info"
-              @click="filterComplexity"
+              v-on:click.stop.prevent="filterComplexity"
               v-if="expandFilter"
             >Pretraži po zahtjevnosti</b-button>
             <b-button
               class="btn btn-info"
-              @click="filterPersons"
+              v-on:click.stop.prevent="filterPersons"
               v-if="expandFilter"
             >Pretraži po količini</b-button>
           </div>
         </b-card>
-        <div class="info">
-          <p>Ukupno rezultata: {{recepies.length}}</p>
-        </div>
-        <div class="results" v-for="(rec, i) in recepies" :key="i" v-if="!filteredResults">
-          <b-card>
+
+        <div class="results">
+          <div class="info" v-if="!filteredResults">
+            <p>Ukupno rezultata: {{recepies.length}}</p>
+          </div>
+          <b-card v-for="(rec, i) in recepies" :key="i" v-if="!filteredResults">
             <b-row>
               <b-col cols="8">
-                <h4>{{rec.recepie_name}}</h4>
+                <b-button variant="link">
+                  <h4>{{rec.recepie_name}}</h4>
+                </b-button>
                 <b-card-text>{{rec.steps}}</b-card-text>
               </b-col>
 
@@ -73,16 +76,17 @@
             </b-row>
           </b-card>
         </div>
-        <div
-          class="filtered results"
-          v-for="(frec, i) in filteredRecepies"
-          :key="i"
-          v-if="filteredResults"
-        >
-          <b-card>
+
+        <div class="results">
+          <div class="info" v-if="filteredResults">
+            <p>Ukupno rezultata: {{filteredRecepies.length}}</p>
+          </div>
+          <b-card v-for="(frec, i) in filteredRecepies" :key="i" v-if="filteredResults">
             <b-row>
               <b-col cols="8">
-                <h4>{{frec.recepie_name}}</h4>
+                <b-button variant="link">
+                  <h4>{{frec.recepie_name}}</h4>
+                </b-button>
                 <b-card-text>{{frec.steps}}</b-card-text>
               </b-col>
 
@@ -144,10 +148,9 @@ export default {
       e.preventDefault();
       const category = this.category;
       api /*eslint-disable */
-        .get("filter/" + category)
+        .get("filter/category/" + category)
         .then(({ data }) => {
           this.filteredRecepies = data.data;
-          console.log(filteredRecepies);
           this.filteredResults = true;
         })
         .catch(error => {
@@ -158,10 +161,11 @@ export default {
       e.preventDefault();
       const complexity = this.complexity;
       api /*eslint-disable */
-        .get("filter/" + complexity)
+        .get("filter/complexity/" + complexity)
         .then(({ data }) => {
-          this.recepies = data.data;
+          this.filteredRecepies = data.data;
           this.filteredResults = true;
+          console.log("usao:", this.filteredRecepies);
           console.log("usao");
         })
         .catch(error => {
@@ -172,7 +176,7 @@ export default {
       e.preventDefault();
       const persons = this.persons;
       api /*eslint-disable */
-        .get("filter/" + persons)
+        .get("filter/persons/" + persons)
         .then(({ data }) => {
           this.filteredRecepies = data.data;
           this.filteredResults = true;
